@@ -2,6 +2,14 @@ const router = require('express').Router();
 const { Category, Product } = require('../../models');
 
 // The `/api/categories` endpoint
+get.router('./', async (req, resp) => {
+  try {
+    const categories = await Category.findAll({ include: [{model: Product}] });
+    res.status(200).json(categories);
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server unable to find.'});
+    }
+  });
 
 router.get('/', (req, res) => {
   // find all categories

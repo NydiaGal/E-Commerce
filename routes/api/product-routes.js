@@ -106,8 +106,8 @@ router.put('/:id', async (req, res) => {
   }
 
   // Respond with updated product
-  const product = await Product.findByPk(req.params.id, { include: [{ model: Tag }] });
-  return res.json(product);
+  const productUpdate = await Product.findByPk(req.params.id, { include: [{ model: Tag }] });
+  return res.json(productUpdate);
 } catch (error) {
   console.log(error);
   return res.status(500).json({ message: 'Product was not updated. Try again.', error: err });

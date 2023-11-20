@@ -28,7 +28,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 // create new product
-router.post('/:id', async (req, res) => {
+router.post('/', (req, res) => {
+  Product.create(req.body)
+    .then((product) => {
+      if (req.body.tagIds.length) {
+        const newProduct = req.body.tagIds.map((tag_id) => {
+          return {
+            product_id: product.id,tag_id,
+            };
+          });
+          return ProductTag.bulkCreate(newProduct);
+        }
+        res.status(200).json(product);
+      })
+      .then((newProduct) => res.status(200).json(newProduct))
+      .catch((err) => {
+        res.status(400).json({ message: 'Unable to create a new product', error: err });
+      });
+    });
+
   /* req.body should look like this...
     {
       product_name: "Basketball",

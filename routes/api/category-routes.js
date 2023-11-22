@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-      const category = await Category.findByPk({ 
+      const category = await Category.findByPk(req.params.id,{ 
       include: [{model: Product}] [{model: Category}],
       attributes: {
       include: [
@@ -71,14 +71,24 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
   try {
-    const updatedCategory = await Category.update(req.body, { where: { id: req.params.id } });
-
-    !updatedCategory[0] ? res.status(404).json({ message: 'The cateogory id was not found.' }) : res.status(200).json(updated);
-    } catch (err) {
+    const updatedCategory = await Category.update(req.params.id, { 
+      where: [{ id: req.params.id }, {model: Product}],
+      attributes: {
+      include: [
+        [
+          sequelize.literal(
+            '(UPDATE FROM Category INNER JOIN Product ON Category.id = Product.category_id)'
+          ),
+          'category_update',
+        ],
+      ],
+    },
+  });
 
     res.status(500).json({ message: 'The category update was not successful.' });
   }
 });
+
 
 router.delete('/:id', async (req, res) => {
   try {

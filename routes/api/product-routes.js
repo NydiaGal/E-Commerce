@@ -11,16 +11,16 @@ router.get('/', async (req, res) => {
       include: [
         [
           sequelize.literal(
-            '(SELECT * FROM Category INNER JOIN Product ON Category.id = Product.category_id)'
+            'SELECT Product.product_name, Category.category_name, Tag.tag_name FROM Product INNER JOIN Category ON Product.category_id = Category.id INNER JOIN ProductTag ON Product.id = ProductTag.product_id INNER JOIN Tag ON ProductTag.tag_id = Tag.id;'
           ),
-          'categoryTotal',
+          'productTotal',
         ],
       ],
     },
   });
     res.status(200).json(products);
   } catch (err) {
-    res.status(500).json({ message: 'Internal server unable to find the products.'});
+    res.status(500).json({ message: 'Internal server unable to find products.'});
   }
 });
 
@@ -28,8 +28,18 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, {
-      include: [{ model: Category }, { model: Tag }],
-    });
+      include: [{model: Category}],
+      attributes: {
+      include: [
+        [
+          sequelize.literal(
+            'SELECT Product.product_name, Category.category_name, Tag.tag_name FROM Product INNER JOIN Category ON Product.category_id = Category.id INNER JOIN ProductTag ON Product.id = ProductTag.product_id INNER JOIN Tag ON ProductTag.tag_id = Tag.id;'
+          ),
+          'productTotal',
+        ],
+      ],
+    },
+  });
     !product
       ? res.status(404).json({ message: 'The product requested was not found.' })
       : res.status(200).json(product);

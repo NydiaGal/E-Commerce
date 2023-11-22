@@ -6,8 +6,18 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     const products = await Product.findAll({
-      include: [{ model: Category }, { model: Tag }],
-    });
+      include: [{model: Category}],
+      attributes: {
+      include: [
+        [
+          sequelize.literal(
+            '(SELECT * FROM Category INNER JOIN Product ON Category.id = Product.category_id)'
+          ),
+          'categoryTotal',
+        ],
+      ],
+    },
+  });
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ message: 'Internal server unable to find the products.'});
